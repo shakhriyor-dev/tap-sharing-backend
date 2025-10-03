@@ -1,18 +1,8 @@
 const mongoose = require("mongoose");
 
-const linkSchema = new mongoose.Schema({
-  title: String,
-  url: String,
-  order: Number,
-});
-
 const userSchema = new mongoose.Schema({
-  username: { type: String, unique: true, required: true },
-  password: { type: String, required: true }, // храним хэш
-  name: String,
-  bio: String,
-  avatar: String,
-  links: [linkSchema],
-});
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true }
+}, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

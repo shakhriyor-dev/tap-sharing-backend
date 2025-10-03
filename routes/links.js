@@ -2,17 +2,66 @@
  * @swagger
  * tags:
  *   name: Links
- *   description: Управление ссылками пользователя
+ *   description: Управление ссылками
  */
 
 /**
  * @swagger
  * /links:
  *   post:
- *     summary: Добавить ссылку пользователю
+ *     summary: Создать новую ссылку
  *     tags: [Links]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, url]
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: GitHub
+ *               url:
+ *                 type: string
+ *                 example: https://github.com
+ *               imageUrl:
+ *                 type: string
+ *                 example: https://cdn-icons-png.flaticon.com/512/25/25231.png
+ *     responses:
+ *       200:
+ *         description: Ссылка создана
+ */
+
+/**
+ * @swagger
+ * /links:
+ *   get:
+ *     summary: Получить все ссылки пользователя
+ *     tags: [Links]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список ссылок
+ */
+
+/**
+ * @swagger
+ * /links/{id}:
+ *   put:
+ *     summary: Обновить ссылку
+ *     tags: [Links]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -24,10 +73,15 @@
  *                 type: string
  *               url:
  *                 type: string
+ *               imageUrl:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Ссылка добавлена
- *
+ *         description: Ссылка обновлена
+ */
+
+/**
+ * @swagger
  * /links/{id}:
  *   delete:
  *     summary: Удалить ссылку
@@ -45,39 +99,44 @@
  *         description: Ссылка удалена
  */
 
-
 const express = require("express");
-const User = require("../models/User");
-const auth = require("../middleware/auth");
+const Link = require("../models/Link");
+const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
 
-
-router.post("/", auth, async (req, res) => {
-  const { title, url } = req.body;
-  const user = await User.findById(req.user.id);
-  if (!user) return res.status(404).json({ error: "User not found" });
-
-  user.links.push({ title, url, order: user.links.length });
-  await user.save();
-
-  res.json(user);
+// Создать ссылку
+router.post("/", authMiddleware, async (req, res) => {
+  try {
+    const { title, url, imageUrl } = req.body;
+    const link = await Link.create({ title, url, imageUrl, user: req.user.id });
+    res.json(link);
+  } catch (err) {
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
 });
 
-/**
- * @swagger
- * /links/{id}:
- *   delete:
- *     summary: Удалить ссылку
- */
-router.delete("/:id", auth, async (req, res) => {
-  const user = await User.findById(req.user.id);
-  if (!user) return res.status(404).json({ error: "User not found" });
+// Получить все ссылки пользователя
+router.get("/", authMiddleware, async (req, res) => {
+  const links = await Link.find({ user: req.user.id });
+  res.json(links);
+});
 
-  user.links = user.links.filter((l) => l._id.toString() !== req.params.id);
-  await user.save();
+// Обновить ссылку
+router.put("/:id", authMiddleware, async (req, res) => {
+  const { title, url, imageUrl } = req.body;
+  const link = await Link.findOneAndUpdate(
+    { _id: req.params.id, user: req.user.id },
+    { title, url, imageUrl },
+    { new: true }
+  );
+  res.json(link);
+});
 
-  res.json(user);
+// Удалить ссылку
+router.delete("/:id", authMiddleware, async (req, res) => {
+  await Link.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+  res.json({ message: "Ссылка удалена" });
 });
 
 module.exports = router;

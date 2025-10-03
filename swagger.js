@@ -9,23 +9,15 @@ const options = {
       version: "1.0.0",
       description: "API для управления пользователями и ссылками",
     },
-    servers: [{ url: "https://tap-sharing-backend.onrender.com/" }],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
+    servers: [
+      { url: process.env.RENDER_EXTERNAL_URL || "http://localhost:3000" }
+    ],
   },
   apis: ["./routes/*.js"],
 };
 
-const swaggerSpec = swaggerJsDoc(options);
+const specs = swaggerJsDoc(options);
 
 module.exports = (app) => {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 };
