@@ -9,7 +9,7 @@ const options = {
       version: "1.0.0",
       description: "API для управления пользователями и ссылками",
     },
-    servers: [{ url: "http://localhost:3000" }],
+    servers: [{ url: "https://tap-sharing-backend.onrender.com/" }],
     components: {
       securitySchemes: {
         bearerAuth: {
