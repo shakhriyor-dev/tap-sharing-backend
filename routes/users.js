@@ -2,20 +2,47 @@
  * @swagger
  * tags:
  *   name: Users
- *   description: Работа с пользователями
+ *   description: Управление профилем пользователей
  */
 
 /**
  * @swagger
- * /users/me:
+ * /users/{username}:
  *   get:
- *     summary: Получить данные текущего пользователя
+ *     summary: Получить публичный профиль
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Профиль найден
+ *
+ * /users/me:
+ *   put:
+ *     summary: Обновить свой профиль
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               bio:
+ *                 type: string
+ *               avatar:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Информация о пользователе
+ *         description: Профиль обновлён
  */
 
 const express = require("express");
