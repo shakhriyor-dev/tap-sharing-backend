@@ -117,6 +117,11 @@ router.post("/", authMiddleware, async (req, res) => {
     if (!urlPattern.test(url)) {
       return res.status(400).json({ error: "Некорректный формат url" });
     }
+    // Проверка на уникальность title для пользователя
+    const existTitle = await Link.findOne({ title, user: req.user.id });
+    if (existTitle) {
+      return res.status(400).json({ error: "Ссылка с таким title уже существует" });
+    }
     const link = await Link.create({ title, url, user: req.user.id });
     res.json(link);
   } catch (err) {

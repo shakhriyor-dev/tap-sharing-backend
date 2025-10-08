@@ -12,6 +12,18 @@ const options = {
     servers: [
       { url: process.env.RENDER_EXTERNAL_URL || "http://localhost:3000" }
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT"
+        }
+      }
+    },
+    security: [
+      { bearerAuth: [] }
+    ]
   },
   apis: ["./routes/*.js"],
 };
