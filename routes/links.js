@@ -108,8 +108,16 @@ const router = express.Router();
 // Создать ссылку
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { title, url, imageUrl } = req.body;
-    const link = await Link.create({ title, url, imageUrl, user: req.user.id });
+    const { title, url } = req.body;
+    if (!title || !url) {
+      return res.status(400).json({ error: "Поля title и url обязательны" });
+    }
+    // Простая проверка URL
+    const urlPattern = /^https?:\/\/.+/;
+    if (!urlPattern.test(url)) {
+      return res.status(400).json({ error: "Некорректный формат url" });
+    }
+    const link = await Link.create({ title, url, user: req.user.id });
     res.json(link);
   } catch (err) {
     res.status(500).json({ error: "Ошибка сервера" });
@@ -118,25 +126,46 @@ router.post("/", authMiddleware, async (req, res) => {
 
 // Получить все ссылки пользователя
 router.get("/", authMiddleware, async (req, res) => {
-  const links = await Link.find({ user: req.user.id });
-  res.json(links);
+  try {
+    const links = await Link.find({ user: req.user.id });
+    res.json(links);
+  } catch (err) {
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
 });
 
 // Обновить ссылку
 router.put("/:id", authMiddleware, async (req, res) => {
-  const { title, url, imageUrl } = req.body;
-  const link = await Link.findOneAndUpdate(
-    { _id: req.params.id, user: req.user.id },
-    { title, url, imageUrl },
-    { new: true }
-  );
-  res.json(link);
+  try {
+    const { title, url } = req.body;
+    if (url && !/^https?:\/\/.+/.test(url)) {
+      return res.status(400).json({ error: "Некорректный формат url" });
+    }
+    const link = await Link.findOneAndUpdate(
+      { _id: req.params.id, user: req.user.id },
+      { title, url },
+      { new: true }
+    );
+    if (!link) {
+      return res.status(404).json({ error: "Ссылка не найдена" });
+    }
+    res.json(link);
+  } catch (err) {
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
 });
 
 // Удалить ссылку
 router.delete("/:id", authMiddleware, async (req, res) => {
-  await Link.findOneAndDelete({ _id: req.params.id, user: req.user.id });
-  res.json({ message: "Ссылка удалена" });
+  try {
+    const link = await Link.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+    if (!link) {
+      return res.status(404).json({ error: "Ссылка не найдена" });
+    }
+    res.json({ message: "Ссылка удалена" });
+  } catch (err) {
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
 });
 
 module.exports = router;

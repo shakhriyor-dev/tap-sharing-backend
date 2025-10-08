@@ -18,11 +18,14 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required: [username, password]
+ *             required: [username, email, password]
  *             properties:
  *               username:
  *                 type: string
  *                 example: user1
+ *               email:
+ *                 type: string
+ *                 example: user1@example.com
  *               password:
  *                 type: string
  *                 example: 123456
@@ -66,12 +69,18 @@ const router = express.Router();
 // Регистрация
 router.post("/register", async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const exist = await User.findOne({ username });
-    if (exist) return res.status(400).json({ error: "Пользователь уже существует" });
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "Все поля обязательны: username, email, password" });
+    }
+    const existUser = await User.findOne({ username });
+    if (existUser) return res.status(400).json({ error: "Пользователь с таким username уже существует" });
+
+    const existEmail = await User.findOne({ email });
+    if (existEmail) return res.status(400).json({ error: "Пользователь с таким email уже существует" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hashedPassword });
+    const user = await User.create({ username, email, password: hashedPassword });
 
     res.json({ message: "Пользователь создан", user });
   } catch (err) {
