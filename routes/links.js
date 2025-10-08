@@ -30,6 +30,8 @@
  *     responses:
  *       200:
  *         description: Ссылка создана
+ *       400:
+ *         description: Некорректные данные (например, отсутствует title или url)
  */
 
 /**
@@ -65,6 +67,7 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             required: [title, url]
  *             properties:
  *               title:
  *                 type: string
@@ -73,6 +76,8 @@
  *     responses:
  *       200:
  *         description: Ссылка обновлена
+ *       400:
+ *         description: Некорректные данные (например, отсутствует title или url)
  */
 
 /**
