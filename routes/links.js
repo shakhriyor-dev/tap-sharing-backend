@@ -27,9 +27,6 @@
  *               url:
  *                 type: string
  *                 example: https://github.com
- *               imageUrl:
- *                 type: string
- *                 example: https://cdn-icons-png.flaticon.com/512/25/25231.png
  *     responses:
  *       200:
  *         description: Ссылка создана
@@ -72,8 +69,6 @@
  *               title:
  *                 type: string
  *               url:
- *                 type: string
- *               imageUrl:
  *                 type: string
  *     responses:
  *       200:
